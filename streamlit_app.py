@@ -26,8 +26,9 @@ st.sidebar.title("Candidate Finder")
 st.sidebar.markdown("Use this app to find the best candidates based on a job description.")
 
 # User inputs
-job_description = st.sidebar.text_area("Job Description", height=350, placeholder="Enter the job description here...")
+job_description = st.sidebar.text_area("Job Description", height=200, placeholder="Enter the job description here...")
 n_candidates = st.sidebar.number_input("Number of Candidates", min_value=1, max_value=100, value=10)
+token = st.sidebar.text_input("DataFinSight Token", type="password")
 
 # Button to trigger the search
 if st.sidebar.button("Find Candidates"):
@@ -41,14 +42,9 @@ if st.sidebar.button("Find Candidates"):
 
             # Make request to the Azure function
             try:
-                # Prepare the request data
-                data = {
-                    "job_description": job_description,
-                    "n": n_candidates
-                }
 
                 # Make the POST request to the Azure Function
-                response = requests.post("http://localhost:7071/api/ai_search", json=data)
+                response = requests.post("https://datafinsight.azurewebsites.net/api/ai_search?code={}".format(token), json=data)
                 response.raise_for_status()
                 csv = response.text
 
