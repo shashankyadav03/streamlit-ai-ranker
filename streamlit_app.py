@@ -75,8 +75,26 @@ if st.sidebar.button("Find Candidates"):
         st.warning("Please provide a job description.")
 
 # Main section for displaying results or instructions
-st.title("AI-Powered Candidate Search")
 st.markdown("""
-    This application helps you find the best candidates for your job openings using Azure Cognitive Search and OpenAI. 
-    Simply enter the job description and the number of candidates you need, and the system will rank and provide the most suitable candidates.
-""")
+    <style>
+        .centered-heading {
+            text-align: center;
+            font-size: 2em; /* Increase the heading size */
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .centered-subheading {
+            text-align: center;
+            font-size: 1em; /* Increase the subheading size */
+            margin-top: -20px;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+    </style>
+    <h1 class='centered-heading'>AI-Powered Candidate Search</h1>
+    <div class='centered-subheading'>
+        This application helps you find the best candidates for your job openings using advanced AI capabilities provided by DataFinSight.
+        Simply enter the job description and the number of candidates you need, and the system will rank and provide the most suitable candidates for the given job.
+    </div>
+""", unsafe_allow_html=True)
+
