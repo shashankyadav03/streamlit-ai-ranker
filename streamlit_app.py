@@ -46,9 +46,19 @@ if st.sidebar.button("Find Candidates"):
                 # Make the POST request to the Azure Function
                 response = requests.post("https://datafinsight.azurewebsites.net/api/ai_search?code={}".format(token), json=data)
                 response.raise_for_status()
-                csv = response.text
+                response_json = response.json()
 
-                if csv:
+                # convert response_json.get("candidates") to list
+                candidates = response_json.get("candidates")
+
+                # Check if candidates exist
+                if candidates:
+                    # Convert the list of candidates to a DataFrame
+                    df = pd.DataFrame(candidates)
+
+                    # Convert the DataFrame to a CSV string
+                    csv = df.to_csv(index=False)
+
                     # Display success message
                     st.success("Candidates found!")
 
