@@ -27,7 +27,7 @@ st.sidebar.markdown("Use this app to find the best candidates based on a job des
 
 # User inputs
 job_description = st.sidebar.text_area("Job Description", height=200, placeholder="Enter the job description here...")
-n_candidates = st.sidebar.number_input("Number of Candidates", min_value=1, max_value=100, value=10)
+n_candidates = st.sidebar.number_input("Page", min_value=0, max_value=20, value=1)
 token = st.sidebar.text_input("DataFinSight Token", type="password")
 
 # Button to trigger the search
