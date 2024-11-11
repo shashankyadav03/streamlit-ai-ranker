@@ -3,6 +3,7 @@ import pandas as pd
 import io
 import logging
 import requests
+import re
 
 # Configure logging
 logging.basicConfig(
@@ -18,6 +19,87 @@ logger = logging.getLogger(__name__)
 # Initialize session state for DataFrame
 if 'df' not in st.session_state:
     st.session_state.df = None
+
+# Function to normalize location
+def normalize_location(location):
+    if pd.isna(location):
+        return "Unknown"
+    location = location.lower()
+    location = re.sub(r'\d+', '', location)  # Remove numbers
+    location = re.sub(r'[^\w\s]', '', location)  # Remove special characters
+    location = location.strip()
+
+    # Define keyword to standard location mapping
+    location_mappings = {
+        'delhi': ['delhi', 'new delhi', 'ncr', 'shahjahanpur'],
+        'mumbai': ['mumbai', 'bombay'],
+        'chennai': ['chennai', 'madras'],
+        'bangalore': ['bangalore', 'bengaluru'],
+        'kolkata': ['kolkata', 'calcutta'],
+        'hyderabad': ['hyderabad'],
+        'ahmedabad': ['ahmedabad'],
+        'jaipur': ['jaipur']
+    }
+
+    for standard, variants in location_mappings.items():
+        if any(variant in location for variant in variants):
+            return standard.capitalize()
+    return location  # Return original if no match found
+
+# Function to normalize disability
+def normalize_disability(disability):
+    if pd.isna(disability) or disability.strip() == "":
+        return "None"
+    disability = disability.lower()
+    disability = re.sub(r'\d+%', '', disability)  # Remove percentage
+    disability = re.sub(r'[^\w\s]', '', disability)  # Remove special characters
+    disability = disability.strip()
+
+    # Define keyword to standard disability mapping
+    disability_mappings = {
+        'locomotor': ['locomotor', 'locomotor disability', 'locomotor can work'],
+        'blindness': ['blindness', 'blind'],
+        'low vision': ['low vision', 'vision impairment'],
+        'hearing impairment': ['hearing impairment', 'deaf', 'hard of hearing'],
+        'intellectual disability': ['intellectual disability', 'learning disability']
+    }
+
+    for standard, variants in disability_mappings.items():
+        if any(variant in disability for variant in variants):
+            return standard.capitalize()
+    return disability  # Return original if no match found
+
+# Function to normalize educational qualification
+def normalize_education(education):
+    if pd.isna(education):
+        return "Unknown"
+    education = education.lower()
+    education = re.sub(r'[^\w\s]', '', education)  # Remove special characters
+    education = education.strip()
+
+    education_mappings = {
+        'high school': ['10th pass', '12th pass', 'high school', 'secondary'],
+        'bachelors': ['bachelors', 'bachelor'],
+        'masters': ['masters', 'master'],
+        'phd': ['phd', 'doctorate', 'doctoral']
+    }
+
+    for standard, variants in education_mappings.items():
+        if any(variant in education for variant in variants):
+            return standard.capitalize()
+    return education  # Return original if no match found
+
+# Function to normalize work experience
+def normalize_experience(exp):
+    if pd.isna(exp) or exp == "":
+        return 0.0
+    try:
+        return float(exp)
+    except ValueError:
+        match = re.match(r'(\d+\.?\d*)', exp)
+        if match:
+            return float(match.group(1))
+        return 0.0
 
 # Streamlit app setup
 st.set_page_config(page_title="Candidate Finder", layout="wide")
@@ -63,8 +145,11 @@ if st.sidebar.button("Find Candidates"):
                         # Convert the list of candidates to a DataFrame
                         df = pd.DataFrame(candidates)
             
-                        # Convert 'work_experience' to numeric, handling empty strings as 0
-                        df['work_experience'] = pd.to_numeric(df['work_experience'], errors='coerce').fillna(0)
+                        # Normalize the relevant fields
+                        df['location_preference'] = df['location_preference'].apply(normalize_location)
+                        df['disability'] = df['disability'].apply(normalize_disability)
+                        df['educational_qualification'] = df['educational_qualification'].apply(normalize_education)
+                        df['work_experience'] = df['work_experience'].apply(normalize_experience)
 
                         # Drop email column
                         df.drop(columns=['email'], inplace=True)
